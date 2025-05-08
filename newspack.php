@@ -11,11 +11,13 @@ return [
      */
     'base_mapping' => [
         // Linear => Asana.
-        'Title' => 'Name',
-        'Description' => 'Notes',
+        'Title' => 'Task Name',
+        'Description' => 'Description',
         'Priority' => 'Priority [Newspack Product]',
-        'Status' => 'Section/Column',
+        'Status' => 'Sections',
         'Assignee' => 'Assignee',
+        'Created' => 'Created At',
+        'Completed' => 'Completed At',
         'Labels' => '',
     ],
 
@@ -33,10 +35,14 @@ return [
             'Medium' => 'Medium',
             'Low' => 'Low',
         ],
+        /**
+         * Looks like with the export from Bridge24, the Assignee field already matches the Linear user name.
+         * It's the full name, so we don't need to do anything, except for Raz.
+         */
         'Assignee' => [
-            'leogermani' => 'Leo Germani',
+            'Rasmy Nguyen' => 'rasmy.nguyen@a8c.com',
         ],
-        'Section/Column' => [
+        'Sections' => [
             // Product Engineering Inbox.
             'Inbox (NEW TASKS HERE)' => 'Triage',
             'In triage / discussion' => 'Todo',
@@ -91,21 +97,26 @@ return [
     ],
 
     /**
+     * Fields that will be appended to the description.
+     */
+    'append_to_description' => [
+        'P2 or Slack thread [Newspack Product]',
+        'Task URL',
+        'Comments',
+    ],
+
+    /**
      * Custom field handlers for special transformations.
      *
      * Each handler is a callable function that takes the input value and output row,
      * and returns the modified output row.
      */
     'field_handlers' => [
-        'P2 or Slack thread [Newspack Product]' => function ( $input, $output, $transformer ) {
-            // Get the index of the Description field
-            $descriptionIndex = $transformer->getOutputFieldIndex('Description');
-
-            // Append the P2 or Slack thread to the description
-            if (! empty($input) ) {
-                $output[ $descriptionIndex ] .= "\n\nP2 or Slack thread: " . $input;
+        'Completed' => function ( $input, $output, $transformer ) {
+            // If the Completed field is set to 1, force the Status field to "Done".
+            if ($input == '1') {
+                $output[ $transformer->getOutputFieldIndex('Status') ] = 'Done';
             }
-
             return $output;
         },
     ],

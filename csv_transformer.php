@@ -20,6 +20,7 @@ class CSVTransformer
     private $_fields_mapping = [];
     private $_labels_mapping = [];
     private $_field_handlers = [];
+    private $_append_to_description = [];
     private $_config_file;
 
     /**
@@ -63,6 +64,7 @@ class CSVTransformer
         $this->_fields_mapping = $config['fields_mapping'] ?? [];
         $this->_labels_mapping = $config['labels_mapping'] ?? [];
         $this->_field_handlers = $config['field_handlers'] ?? [];
+        $this->_append_to_description = $config['append_to_description'] ?? [];
 
         // Validate required mappings
         if (empty($this->_base_mapping) ) {
@@ -83,7 +85,7 @@ class CSVTransformer
         }
 
         // Read the first line to get headers
-        $headers = fgetcsv($handle);
+        $headers = fgetcsv($handle, null, ';', '"');
         if ($headers === false ) {
             fclose($handle);
             throw new Exception('Failed to read headers from CSV file');
@@ -208,11 +210,16 @@ class CSVTransformer
             return $output;
         }
 
-        if (isset($mapping[ $input ]) ) {
-            $output[ $fieldIndex ] = $mapping[ $input ];
-        } else {
-            echo "Unknown {$field_name}: $input\n";
-            $output[ $fieldIndex ] = $input; // Keep original value if no mapping exists
+        // Some fields, like sections, have multiple values separated by new lines.
+        // In those cases, loop through values and apply the mapping of the first we find.
+        // If no mapping is found, keep the value as is.
+        $output[ $fieldIndex ] = $input;
+        $values = explode("\n", $input);
+        foreach ($values as $value) {
+            if (isset($mapping[ $value ]) ) {
+                $output[ $fieldIndex ] = $mapping[ $value ];
+                break;
+            }
         }
 
         return $output;
@@ -239,13 +246,13 @@ class CSVTransformer
         }
 
         // Skip the header row in the input file
-        fgetcsv($inputHandle);
+        fgetcsv($inputHandle, null, ';', '"');
 
         // Write the header row to the output file
         fputcsv($outputHandle, array_keys($this->_base_mapping));
 
         // Process each row
-        while ( ( $row = fgetcsv($inputHandle) ) !== false ) {
+        while ( ( $row = fgetcsv($inputHandle, null, ';', '"') ) !== false ) {
             $outputRow = [];
 
             foreach ( $this->_base_mapping as $outputField => $inputField ) {
@@ -288,6 +295,19 @@ class CSVTransformer
                     $mapping,
                     $inputField
                 );
+            }
+
+            // Process append_to_description fields
+            if (! empty($this->_append_to_description) ) {
+                $descriptionIndex = $this->getOutputFieldIndex('Description');
+                if ($descriptionIndex !== null ) {
+                    foreach ( $this->_append_to_description as $inputField ) {
+                        $input = $this->get_value_by_field_name($row, $inputField);
+                        if (! empty($input) ) {
+                            $outputRow[ $descriptionIndex ] .= "\n\n# " . $inputField . "\n\n" . $input;
+                        }
+                    }
+                }
             }
 
             fputcsv($outputHandle, $outputRow);

@@ -18,7 +18,7 @@ The transformer is particularly useful when you need to migrate projects one by 
 ## Requirements
 
 - PHP 7.4 or higher
-- CSV file exported from Asana
+- CSV file exported from Asana (or exported via https://app.bridge24.com/)
 
 ## Installation
 
@@ -46,6 +46,7 @@ The configuration file contains:
 - `base_mapping`: Maps Linear fields to Asana fields
 - `fields_mapping`: Transforms field values (e.g., priorities, statuses)
 - `labels_mapping`: Converts Asana fields to Linear labels
+- `append_to_description`: List of fields to append to the description
 - `field_handlers`: Custom handlers for special field transformations
 
 A default configuration for Newspack projects is provided in `newspack.php`.
@@ -54,8 +55,7 @@ A default configuration for Newspack projects is provided in `newspack.php`.
 
 Use the command-line interface to transform your CSV file:
 
-```
-php csv_transformer.php input-file.csv output-file.csv config-file.php
+```php csv_transformer.php input-file.csv output-file.csv config-file.php
 ```
 
 Example:
@@ -86,7 +86,11 @@ return [
     'labels_mapping' => [
         // Label mappings
     ],
-    // For Asana custom fields that needs special treatment (for exmaple, appending to the description)
+    // A list of fields that exist in the CSV and should be appended to the end of the issue Description.
+    'append_to_description' => [
+        'Comments',
+    ],
+    // For Asana custom fields that needs special treatment.
     'field_handlers' => [
         // Custom field handlers as anonymous functions
         'Some Asana Field' => function($input, $output, $transformer) {
