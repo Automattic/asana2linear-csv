@@ -303,8 +303,21 @@ class CSVTransformer
                 if ($descriptionIndex !== null ) {
                     foreach ( $this->_append_to_description as $inputField ) {
                         $input = $this->get_value_by_field_name($row, $inputField);
+
+                        if ('Comments' === $inputField ) {
+                            // Creates a header for each comment.
+                            // Searches for "User Name (2025-04-25 04:02):".
+                            $pattern = '[^\(]+\(\d{4}-\d\d-\d\d \d\d:\d\d\):';
+
+                            // all other lines.
+                            $input = preg_replace('/\n(' . $pattern . ')/', "\n### $1\n", $input);
+                            // first line.
+                            $input = preg_replace('/^(' . $pattern . ')/', "\n### $1\n", $input);
+
+                        }
+
                         if (! empty($input) ) {
-                            $outputRow[ $descriptionIndex ] .= "\n\n# " . $inputField . "\n\n" . $input;
+                            $outputRow[ $descriptionIndex ] .= "\n\n## " . $inputField . "\n\n" . $input;
                         }
                     }
                 }
