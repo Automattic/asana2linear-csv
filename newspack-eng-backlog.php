@@ -14,7 +14,7 @@ return [
         'Title' => 'Task Name',
         'Description' => 'Description',
         'Priority' => 'Priority [Newspack Product]',
-        'Status' => 'Sections',
+        'Status' => '',
         'Assignee' => 'Assignee',
         'Created' => 'Created At',
         'Completed' => 'Completed At',
@@ -41,27 +41,6 @@ return [
          */
         'Assignee' => [
             'Rasmy Nguyen' => 'rasmy.nguyen@a8c.com',
-        ],
-        'Sections' => [
-            // Product Engineering Inbox.
-            'Inbox (NEW TASKS HERE)' => 'Triage',
-            'In triage / discussion' => 'Todo',
-            'Triaged / Ready to start' => 'Triaged / Ready to start',
-            'In progress' => 'In progress',
-            'On hold / blocked' => 'On hold / Blocked',
-            'Review / Testing / Feedback' => 'In Review',
-            'Merged / Awaiting release' => 'Merged / Awaiting release',
-            'Released and deployed' => 'Done',
-            "Won't Fix" => 'Won\'t Fix',
-            'Complete' => 'Done',
-
-            // Simple project template used in a few projects.
-            'Backlog' => 'Todo',
-            'In Progress' => 'In progress',
-            'Review' => 'In Review',
-            'Blocked/On Hold' => 'On hold / Blocked',
-            'Done' => 'Done',
-            'Untitled section' => 'Backlog',
         ],
     ],
 
@@ -95,6 +74,11 @@ return [
             '5-Maintenance high' => 'High Impact',
             '6-Maintenance low' => 'Low Impact',
         ],
+        'Sections' => [
+            'Icebox' => 'Icebox',
+            'Maintenance & Workflow' => 'Maintenance & Workflow',
+            'Bugs' => 'Bugs',
+        ],
     ],
 
     /**
@@ -113,6 +97,25 @@ return [
      * and returns the modified output row.
      */
     'field_handlers' => [
+        'Sections' => function ( $input, $output, $transformer ) {
+            // All sections are mapped to "Backlog" in Linear.
+            $output[ $transformer->getOutputFieldIndex('Status') ] = 'Backlog';
+            if ($input == 'Complete/Closed') {
+                $output[ $transformer->getOutputFieldIndex('Status') ] = 'Done';
+            }
+
+            // Populate the org level Bug task type label.
+            if ('Bugs' === $input ) {
+                $labelIndex = $transformer->getOutputFieldIndex('Labels');
+                if (! empty($output[ $labelIndex ]) ) {
+                    $output[ $labelIndex ] .= ', ';
+                }
+
+                $output[ $labelIndex ] .= 'Bug';
+            }
+
+            return $output;
+        },
         'Completed' => function ( $input, $output, $transformer ) {
             // If the Completed field is set to 1, force the Status field to "Done".
             if ($input == '1' || strtolower($input) == 'yes') {

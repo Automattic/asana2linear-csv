@@ -43,25 +43,8 @@ return [
             'Rasmy Nguyen' => 'rasmy.nguyen@a8c.com',
         ],
         'Sections' => [
-            // Product Engineering Inbox.
-            'Inbox (NEW TASKS HERE)' => 'Triage',
-            'In triage / discussion' => 'Todo',
-            'Triaged / Ready to start' => 'Triaged / Ready to start',
-            'In progress' => 'In progress',
-            'On hold / blocked' => 'On hold / Blocked',
-            'Review / Testing / Feedback' => 'In Review',
-            'Merged / Awaiting release' => 'Merged / Awaiting release',
-            'Released and deployed' => 'Done',
-            "Won't Fix" => 'Won\'t Fix',
-            'Complete' => 'Done',
-
-            // Simple project template used in a few projects.
-            'Backlog' => 'Todo',
-            'In Progress' => 'In progress',
-            'Review' => 'In Review',
-            'Blocked/On Hold' => 'On hold / Blocked',
-            'Done' => 'Done',
-            'Untitled section' => 'Backlog',
+            'New' => 'Triage',
+            'Product Feedback' => 'Backlog',
         ],
     ],
 
@@ -94,6 +77,11 @@ return [
             '4-Low' => 'Low Impact',
             '5-Maintenance high' => 'High Impact',
             '6-Maintenance low' => 'Low Impact',
+        ],
+        'Sections' => [
+            'Icebox' => 'Icebox',
+            'Maintenance & Workflow' => 'Maintenance & Workflow',
+            'Bugs' => 'Bugs',
         ],
     ],
 

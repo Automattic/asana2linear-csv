@@ -169,16 +169,17 @@ class CSVTransformer
      */
     private function _handleLabel( $input, $output, $mapping, $field_name )
     {
-        if (isset($mapping[ $input ]) ) {
-            $input = $mapping[ $input ];
-        } else {
-            if (! empty($input) ) {
-                echo "Unknown {$field_name}: $input\n";
+
+        $values = explode("\n", $input);
+        $parsed_input = '';
+        foreach ($values as $value) {
+            if (isset($mapping[ $value ]) ) {
+                $parsed_input = $mapping[ $value ];
+                break;
             }
-            $input = '';
         }
 
-        if (empty($input) ) {
+        if (empty($parsed_input) ) {
             return $output;
         }
 
@@ -187,7 +188,7 @@ class CSVTransformer
             $output[ $labelIndex ] .= ', ';
         }
 
-        $output[ $labelIndex ] .= $input;
+        $output[ $labelIndex ] .= $parsed_input;
         return $output;
     }
 
@@ -257,6 +258,12 @@ class CSVTransformer
 
             foreach ( $this->_base_mapping as $outputField => $inputField ) {
                 $outputRow[] = $this->get_value_by_field_name($row, $inputField);
+            }
+
+            // Make sure the title is not empty, otherwise the import will fail.
+            $titleIndex = $this->getOutputFieldIndex('Title');
+            if (empty($outputRow[ $titleIndex ]) ) {
+                $outputRow[ $titleIndex ] = 'No title';
             }
 
             // Process field mappings
